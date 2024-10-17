@@ -1,0 +1,98 @@
+_BASE_: ../../coach_pl/configuration/base.yaml
+
+DATALOADER:
+  PIN_MEMORY: True
+  DROP_LAST: False
+  PERSISTENT_WORKERS: True
+
+  TRAIN:
+    BATCH_SIZE: 4096
+    NUM_WORKERS: 4
+
+  VAL:
+    BATCH_SIZE: 1
+    NUM_WORKERS: 4
+
+  TEST:
+    BATCH_SIZE: 1
+    NUM_WORKERS: 4
+
+DATASET:
+  NAME: BlenderDataset
+  ROOT: null
+
+  TRANSFORM:
+    NAME: PerspectiveRayGenerator
+
+MODEL:
+  NAME: NeuralRadianceField
+  DEVICE: cuda
+
+  CRITERION:
+    NAME: NeuralRadianceFieldCriterion
+
+  METRIC:
+    NAME: NeuralRadianceFieldMetric
+
+  SCENE:
+    NAME: GridScene
+
+    AABB_SCALE: 1.0
+    RESOLUTION: 128
+    NUM_SAMPLES_PER_RAY: 512
+
+  RENDERER:
+    NAME: VolumeRenderer
+
+    RENDER_DEPTH: False
+    RENDER_NORMAL: False
+    RENDER_FEATURE: False
+
+  SH_DEGREES: 3
+  BG_COLOR: [1.0, 1.0, 1.0]
+
+MODULE:
+  NAME: NeuralRadianceFieldTrainingModule
+  COMPILE: False
+
+  OPTIMIZER:
+    NAME: Adam
+    BASE_LR: 1e-2
+    PARAMS:
+      WEIGHT_DECAY: 0.0
+
+  SCHEDULER:
+    NAME: cosine
+    STEP_ON_EPOCHS: False
+    PARAMS:
+      WARMUP_LR: 1.0e-6
+      WARMUP_EPOCHS: 1
+
+  CHUNK_SIZE: 65536
+
+TRAINER:
+  STRATEGY: auto        # Set to `auto`, `ddp`, `deepspeed_stage_2`, `deepspeed_stage_3` ...
+  MIXED_PRECISION: False
+  CHECKPOINT:
+    EVERY_N_EPOCHS: 1
+
+    SAVE_BEST: True     # If True, monitor will be required
+    MONITOR: psnr
+    MONITOR_MODE: max   # Set to `min` or `max`
+
+  MAX_EPOCHS: 10        # If profiler is enabled, this will be *automatically* set to 1
+  LOG_EVERY_N_STEPS: 20
+  ACCUMULATE_GRAD_BATCHES: 1
+
+  CLIP_GRAD:
+    ALGORITHM: null
+    VALUE: null
+
+  DETERMINISTIC: False  # Set to True to enable cudnn.deterministic
+  BENCHMARK: False      # Set to True to enable cudnn.benchmark
+  PROFILER: null        # Set to `advanced` or `pytorch` to enable profiling
+  DETECT_ANOMALY: False # Set to True to enable anomaly detection
+  SYNC_BATCHNORM: False # Set to True to enable sync batchnorm
+
+SEED: 0
+OUTPUT_DIR: null
