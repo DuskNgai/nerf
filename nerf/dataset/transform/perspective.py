@@ -32,9 +32,9 @@ class PerspectiveRayGenerator(BaseRayGenerator):
         x, y = self.image_coordinates_to_screen_coordinates(x, y, H, W)
         xy_hom = self.screen_coordinates_to_view_coordinates(x, y, camera_angle_x, camera_angle_y, H, W)
 
-        origin = poses[:, :3, 3].reshape(-1, 1, 1, 3).expand(-1, H, W, -1)
+        origin = poses[..., :3, 3].reshape(-1, 1, 1, 3).expand(-1, H, W, -1)
         direction = torch.nn.functional.normalize(
-            torch.einsum("bij, hwi -> bhwj", poses[:, :3, :3].transpose(-2, -1), xy_hom)
+            torch.einsum("...ij, hwi -> ...hwj", poses[..., :3, :3].transpose(-2, -1), xy_hom)
         , p=2, dim=-1)
 
         return origin, direction

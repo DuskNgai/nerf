@@ -125,7 +125,7 @@ class NeuralRadianceFieldTrainingModule(LightningModule):
                 output[k].append(v)
 
         output = {k: torch.cat(v, dim=0) for k, v in output.items()}
-        output["color"] = output["color"].reshape(B, H, W, C)
+        output["color"] = output["color"].reshape(B, H, W, C).clamp(0.0, 1.0)
         output["transmittance"] = output["transmittance"].reshape(B, H, W, 1)
 
         loss_dict = self.criterion(output, batch)
@@ -156,7 +156,7 @@ class NeuralRadianceFieldTrainingModule(LightningModule):
                 output[k].append(v)
 
         output = {k: torch.cat(v, dim=0) for k, v in output.items()}
-        output["color"] = output["color"].reshape(B, H, W, C)
+        output["color"] = output["color"].reshape(B, H, W, C).clamp(0.0, 1.0)
         output["transmittance"] = output["transmittance"].reshape(B, H, W, 1)
 
         loss_dict = self.criterion(output, batch)

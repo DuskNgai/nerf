@@ -64,7 +64,7 @@ class GridScene(Scene):
         xyz = (origin.unsqueeze(-2) + direction.unsqueeze(-2) * t)[:, :-1] # [B, N, 3]
 
         xyz_normalized = xyz / self.aabb_scale
-        xyz_normalized = xyz_normalized.reshape(1, 1, -1, self.num_samples_per_ray, 3)
+        xyz_normalized = xyz_normalized.reshape(1, 1, -1, self.num_samples_per_ray, 3) # [1, 1, B, N, 3]
         feature = F.grid_sample(self.grid, xyz_normalized, align_corners=True, mode='bilinear', padding_mode="zeros")
         feature = feature.reshape(self.feature_dim, -1, self.num_samples_per_ray).permute(1, 2, 0) # [B, N, C]
 
