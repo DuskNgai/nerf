@@ -32,7 +32,9 @@ class OrthographicRayGenerator(BaseRayGenerator):
         xy_hom = self.screen_coordinates_to_view_coordinates(x, y, view_port_x, view_port_y, H, W)
 
         origin = xy_hom
-        direction = -torch.nn.functional.normalize(poses[..., :3, 2]).reshape(-1, 1, 1, 3).expand(-1, H, W, 3) # [H, W, 3]
+        # OpenGL looks down the negative z-axis, so we negate z.
+        direction = torch.nn.functional.normalize(poses[..., :3, 2]).reshape(-1, 1, 1, 3).expand(-1, H, W, 3) # [H, W, 3]
+        direction[..., 2] = -direction[..., 2]
 
         return origin, direction
 

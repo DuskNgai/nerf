@@ -91,7 +91,7 @@ class SphericalHarmonics(object):
 
     def __call__(self, coeffs: torch.Tensor, xyz: torch.Tensor) -> torch.Tensor:
         """
-        The `xyz` should be normalized to [-1, 1] before passing to this function.
+        The `xyz` should be normalized to the unit sphere before passing to this function.
         """
 
         x, y, z = xyz.unbind(dim=-1)

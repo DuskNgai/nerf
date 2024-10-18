@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from coach_pl.configuration import configurable
 from nerf.model.scene.build import NERF_SCENE_REGISTRY
 from nerf.model.scene.scene import Scene
+from nerf.model.utils.ray_box import ray_box_intersection
 
 __all__ = ["TriplaneScene"]
 
@@ -49,14 +50,7 @@ class TriplaneScene(Scene):
 
         # Ray-box intersection
         aabb_min, aabb_max = self.aabb[0], self.aabb[1] # [3]
-
-        inv_dir = 1.0 / direction
-        t_min = (aabb_min - origin) * inv_dir # [B, 3]
-        t_max = (aabb_max - origin) * inv_dir # [B, 3]
-
-        near = torch.max(torch.minimum(t_min, t_max), dim=-1).values # [B]
-        far  = torch.min(torch.maximum(t_min, t_max), dim=-1).values # [B]
-        invalid = near >= far # [B]
+        near, far, invalid = ray_box_intersection(origin, direction, aabb_min, aabb_max)
 
         # Ray marching
         ramp = torch.linspace(0.0, 1.0, self.num_samples_per_ray + 1, device=origin.device).unsqueeze(0) # [1, N + 1]
