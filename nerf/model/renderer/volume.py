@@ -56,15 +56,15 @@ class VolumeRenderer(Renderer):
             "color": final_color
         }
 
-        if self.render_depth:
-            depth = (weight * t).sum(dim=-2)
+        if self.render_depth and not self.training:
+            depth = (weight * t[:, :-1]).sum(dim=-2) # [B, 1]
             output["depth"] = depth
 
-        if self.render_normal:
+        if self.render_normal and not self.training:
             normal = (weight * normal).sum(dim=-2) # [B, 3]
             output["normal"] = normal
 
-        if self.render_feature:
+        if self.render_feature and not self.training:
             feature = (weight * feature).sum(dim=-2) # [B, 3]
             output["feature"] = feature
 

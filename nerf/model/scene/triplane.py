@@ -60,9 +60,9 @@ class TriplaneScene(Scene):
         xyz_normalized = xyz / self.aabb_scale
         xyz_normalized = xyz_normalized.reshape(1, -1, self.num_samples_per_ray, 3) # [1, B, N, 3]
 
-        xy_feature = F.grid_sample(self.triplane[0:1], xyz_normalized[..., :2], align_corners=True, mode='bilinear', padding_mode="zeros")
-        yz_feature = F.grid_sample(self.triplane[1:2], xyz_normalized[..., 1:], align_corners=True, mode='bilinear', padding_mode="zeros")
-        zx_feature = F.grid_sample(self.triplane[2:3], xyz_normalized[..., [2, 0]], align_corners=True, mode='bilinear', padding_mode="zeros")
+        xy_feature = F.grid_sample(self.triplane[0:1], xyz_normalized[..., :2], align_corners=True, mode="bilinear", padding_mode="zeros")
+        yz_feature = F.grid_sample(self.triplane[1:2], xyz_normalized[..., 1:], align_corners=True, mode="bilinear", padding_mode="zeros")
+        zx_feature = F.grid_sample(self.triplane[2:3], xyz_normalized[..., [2, 0]], align_corners=True, mode="bilinear", padding_mode="zeros")
 
         feature = xy_feature + yz_feature + zx_feature
         feature = feature.reshape(self.feature_dim, -1, self.num_samples_per_ray).permute(1, 2, 0) # [B, N, C]

@@ -125,16 +125,18 @@ class NeuralRadianceFieldTrainingModule(LightningModule):
                 output[k].append(v)
 
         output = {k: torch.cat(v, dim=0) for k, v in output.items()}
-        output["color"] = output["color"].reshape(B, H, W, C).clamp(0.0, 1.0)
-        output["transmittance"] = output["transmittance"].reshape(B, H, W, 1)
+        for k, v in output.items():
+            output[k] = v.reshape(B, H, W, -1)
+        output["color"] = output["color"].clamp(0.0, 1.0)
 
         loss_dict = self.criterion(output, batch)
         metric_dict = self.metric(output, batch)
 
         self.log_dict({f"val/{k}": v for k, v in loss_dict.items()}, on_step=False, on_epoch=True, sync_dist=True, rank_zero_only=True)
         self.log_dict({f"val/{k}": v for k, v in metric_dict.items()}, on_step=False, on_epoch=True, sync_dist=True, rank_zero_only=True)
-        self.logger.experiment.add_image("val/color", to_numpy(output["color"].squeeze(0)), batch_idx)
-        self.logger.experiment.add_image("val/transmittance", to_numpy(output["transmittance"].squeeze(0)), batch_idx)
+        for k, v in output.items():
+            for i, m in enumerate(v):
+                self.logger.experiment.add_image(f"val/{k}", to_numpy(m), batch_idx * B + i)
 
         self.log(self.monitor, metric_dict[self.monitor], logger=False, on_step=False, on_epoch=True, sync_dist=True, rank_zero_only=True)
 
@@ -156,13 +158,15 @@ class NeuralRadianceFieldTrainingModule(LightningModule):
                 output[k].append(v)
 
         output = {k: torch.cat(v, dim=0) for k, v in output.items()}
-        output["color"] = output["color"].reshape(B, H, W, C).clamp(0.0, 1.0)
-        output["transmittance"] = output["transmittance"].reshape(B, H, W, 1)
+        for k, v in output.items():
+            output[k] = v.reshape(B, H, W, -1)
+        output["color"] = output["color"].clamp(0.0, 1.0)
 
         loss_dict = self.criterion(output, batch)
         metric_dict = self.metric(output, batch)
 
         self.log_dict({f"test/{k}": v for k, v in loss_dict.items()}, on_step=False, on_epoch=True, sync_dist=True, rank_zero_only=True)
         self.log_dict({f"test/{k}": v for k, v in metric_dict.items()}, on_step=False, on_epoch=True, sync_dist=True, rank_zero_only=True)
-        self.logger.experiment.add_image("test/color", to_numpy(output["color"].squeeze(0)), batch_idx)
-        self.logger.experiment.add_image("test/transmittance", to_numpy(output["transmittance"].squeeze(0)), batch_idx)
+        for k, v in output.items():
+            for i, m in enumerate(v):
+                self.logger.experiment.add_image(f"val/{k}", to_numpy(m), batch_idx * B + i)

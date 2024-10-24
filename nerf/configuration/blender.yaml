@@ -26,7 +26,6 @@ DATASET:
 
 MODEL:
   NAME: NeuralRadianceField
-  DEVICE: cuda
 
   CRITERION:
     NAME: NeuralRadianceFieldCriterion
@@ -44,7 +43,7 @@ MODEL:
   RENDERER:
     NAME: VolumeRenderer
 
-    RENDER_DEPTH: False
+    RENDER_DEPTH: True
     RENDER_NORMAL: False
     RENDER_FEATURE: False
 
